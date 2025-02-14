@@ -1,9 +1,22 @@
 # Path to the .txt file
 $filePath = "test.txt"
 
+# Check if the file exists
+if (-Not (Test-Path $filePath)) {
+    Write-Host "Error: File '$filePath' does not exist. Please provide a valid file path." -ForegroundColor Red
+    exit
+}
+
 # Read the file and convert it to binary (1's and 0's)
 $fileContent = Get-Content -Raw -Path $filePath
-$binaryData = -join ([System.Text.Encoding]::UTF8.GetBytes($fileContent) | ForEach-Object { [Convert]::ToString($_, 2).PadLeft(8, '0') })
+if (-Not $fileContent) {
+    Write-Host "Error: File '$filePath' is empty or could not be read." -ForegroundColor Red
+    exit
+}
+
+$binaryData = -join ([System.Text.Encoding]::UTF8.GetBytes($fileContent) | ForEach-Object { 
+    [Convert]::ToString($_, 2).PadLeft(8, '0') 
+})
 
 # Function to toggle Num Lock or Caps Lock
 function Toggle-Key {
