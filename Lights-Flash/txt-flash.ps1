@@ -84,6 +84,12 @@ foreach ($bit in $binaryData.ToCharArray()) {
     } else {
         Toggle-Key -KeyName "NumLock"
     }
+    
+    # After each toggle, print the state
+    Write-Host "CapsLock state: $([Keyboard]::GetKeyState(0x14))"
+    Write-Host "NumLock state: $([Keyboard]::GetKeyState(0x90))"
+    Write-Host "ScrollLock state: $([Keyboard]::GetKeyState(0x91))"
+
     Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
 
