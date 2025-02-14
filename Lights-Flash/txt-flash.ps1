@@ -3,6 +3,22 @@ param (
     [int]$Delay = 200               # Default delay in milliseconds
 )
 
+# Add the Keyboard class before usage
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+public class Keyboard {
+    [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+    public static extern short GetKeyState(int keyCode);
+
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+    public const int KEYEVENTF_KEYUP = 0x2;
+}
+"@
+
 # Check if the file exists
 if (-Not (Test-Path $FilePath)) {
     Write-Host "Error: File '$FilePath' does not exist. Please provide a valid file path." -ForegroundColor Red
@@ -32,22 +48,6 @@ function Toggle-Key {
         "ScrollLock" { 0x91 }
         default { return }
     }
-    
-    # Call Windows API functions
-    Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-
-public class Keyboard {
-    [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-    public static extern short GetKeyState(int keyCode);
-
-    [DllImport("user32.dll")]
-    public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
-
-    public const int KEYEVENTF_KEYUP = 0x2;
-}
-"@
 
     # Check current state of the key
     $keyState = [Keyboard]::GetKeyState($virtualKey)
@@ -83,7 +83,13 @@ foreach ($bit in $binaryData.ToCharArray()) {
 # Change Scroll Lock to the opposite of its original state
 Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was ON, turn it OFF
 
-# Reset all locks to their original states
-Toggle-Key -KeyName "CapsLock"
-Toggle-Key -KeyName "NumLock"
-Toggle-Key -KeyName "ScrollLock"
+# Reset all locks to their original states only if needed
+if ($originalCapsLockState -ne ([Keyboard]::GetKeyState(0x14) -band 0x01)) {
+    Toggle-Key -KeyName "CapsLock"
+}
+if ($originalNumLockState -ne ([Keyboard]::GetKeyState(0x90) -band 0x01)) {
+    Toggle-Key -KeyName "NumLock"
+}
+if ($originalScrollLockState -ne ([Keyboard]::GetKeyState(0x91) -band 0x01)) {
+    Toggle-Key -KeyName "ScrollLock"
+}
