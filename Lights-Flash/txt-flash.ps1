@@ -81,14 +81,19 @@ $originalScrollLockState = [Keyboard]::GetKeyState(0x91) -band 0x01
 foreach ($bit in $binaryData.ToCharArray()) {
     if ($bit -eq '1') {
         Toggle-Key -KeyName "CapsLock"
+        # After each toggle, print the state
+        Write-Host "CapsLock state: $([Keyboard]::GetKeyState(0x14))"
+        Write-Host "NumLock state: $([Keyboard]::GetKeyState(0x90))"
+        Write-Host "ScrollLock state: $([Keyboard]::GetKeyState(0x91))"
+    
     } else {
         Toggle-Key -KeyName "NumLock"
+        
+        # After each toggle, print the state
+        Write-Host "CapsLock state: $([Keyboard]::GetKeyState(0x14))"
+        Write-Host "NumLock state: $([Keyboard]::GetKeyState(0x90))"
+        Write-Host "ScrollLock state: $([Keyboard]::GetKeyState(0x91))"
     }
-    
-    # After each toggle, print the state
-    Write-Host "CapsLock state: $([Keyboard]::GetKeyState(0x14))"
-    Write-Host "NumLock state: $([Keyboard]::GetKeyState(0x90))"
-    Write-Host "ScrollLock state: $([Keyboard]::GetKeyState(0x91))"
 
     Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
