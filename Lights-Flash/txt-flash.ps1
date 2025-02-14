@@ -65,6 +65,11 @@ public class Keyboard {
     }
 }
 
+# Store the original states of Caps Lock, Num Lock, and Scroll Lock
+$originalCapsLockState = [Keyboard]::GetKeyState(0x14) -band 0x01
+$originalNumLockState = [Keyboard]::GetKeyState(0x90) -band 0x01
+$originalScrollLockState = [Keyboard]::GetKeyState(0x91) -band 0x01
+
 # Loop through each bit in the binary data and toggle LEDs
 foreach ($bit in $binaryData.ToCharArray()) {
     if ($bit -eq '1') {
@@ -75,6 +80,10 @@ foreach ($bit in $binaryData.ToCharArray()) {
     Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
 
-# Enable Scroll Lock at the end
+# Change Scroll Lock to the opposite of its original state
+Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was ON, turn it OFF
+
+# Reset all locks to their original states
+Toggle-Key -KeyName "CapsLock"
+Toggle-Key -KeyName "NumLock"
 Toggle-Key -KeyName "ScrollLock"
-Write-Host "Scroll Lock has been enabled." -ForegroundColor Green
