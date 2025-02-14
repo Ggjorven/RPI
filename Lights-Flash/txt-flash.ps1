@@ -98,6 +98,15 @@ foreach ($bit in $binaryData.ToCharArray()) {
     Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
 
+# Toggle CapsLock
+[Keyboard]::keybd_event(0x14, 0, 0, [UIntPtr]::Zero)  # Key down
+Write-Host "CapsLock state after toggle: $([Keyboard]::GetKeyState(0x14))"
+Start-Sleep -Milliseconds 100
+
+[Keyboard]::keybd_event(0x14, 0, [Keyboard]::KEYEVENTF_KEYUP, [UIntPtr]::Zero)  # Key up
+Start-Sleep -Milliseconds 100
+Write-Host "CapsLock state after toggle: $([Keyboard]::GetKeyState(0x14))"
+
 # Decode the binary back to characters for printing to console
 $decodedText = [System.Text.Encoding]::UTF8.GetString(
     [System.Convert]::FromBase64String(
