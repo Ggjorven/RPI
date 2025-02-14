@@ -1,16 +1,18 @@
-# Path to the .txt file
-$filePath = "test.txt"
+param (
+    [string]$FilePath = "test.txt",  # Default file path
+    [int]$Delay = 200               # Default delay in milliseconds
+)
 
 # Check if the file exists
-if (-Not (Test-Path $filePath)) {
-    Write-Host "Error: File '$filePath' does not exist. Please provide a valid file path." -ForegroundColor Red
+if (-Not (Test-Path $FilePath)) {
+    Write-Host "Error: File '$FilePath' does not exist. Please provide a valid file path." -ForegroundColor Red
     exit
 }
 
 # Read the file and convert it to binary (1's and 0's)
-$fileContent = Get-Content -Raw -Path $filePath
+$fileContent = Get-Content -Raw -Path $FilePath
 if (-Not $fileContent) {
-    Write-Host "Error: File '$filePath' is empty or could not be read." -ForegroundColor Red
+    Write-Host "Error: File '$FilePath' is empty or could not be read." -ForegroundColor Red
     exit
 }
 
@@ -18,13 +20,18 @@ $binaryData = -join ([System.Text.Encoding]::UTF8.GetBytes($fileContent) | ForEa
     [Convert]::ToString($_, 2).PadLeft(8, '0') 
 })
 
-# Function to toggle Num Lock or Caps Lock
+# Function to toggle keys (Num Lock, Caps Lock, Scroll Lock)
 function Toggle-Key {
     param (
         [string]$KeyName
     )
     # Get virtual key code for the key
-    $virtualKey = if ($KeyName -eq "CapsLock") { 0x14 } elseif ($KeyName -eq "NumLock") { 0x90 } else { return }
+    $virtualKey = switch ($KeyName) {
+        "CapsLock" { 0x14 }
+        "NumLock" { 0x90 }
+        "ScrollLock" { 0x91 }
+        default { return }
+    }
     
     # Call Windows API functions
     Add-Type @"
@@ -65,5 +72,9 @@ foreach ($bit in $binaryData.ToCharArray()) {
     } else {
         Toggle-Key -KeyName "NumLock"
     }
-    Start-Sleep -Milliseconds 200  # Adjust the delay for visibility
+    Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
+
+# Enable Scroll Lock at the end
+Toggle-Key -KeyName "ScrollLock"
+Write-Host "Scroll Lock has been enabled." -ForegroundColor Green
