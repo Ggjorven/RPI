@@ -32,9 +32,16 @@ if (-Not $fileContent) {
     exit
 }
 
+# Print the file content for verification
+Write-Host "File Content: $fileContent" -ForegroundColor Cyan
+
+# Convert the file content to binary
 $binaryData = -join ([System.Text.Encoding]::UTF8.GetBytes($fileContent) | ForEach-Object { 
     [Convert]::ToString($_, 2).PadLeft(8, '0') 
 })
+
+# Print the binary data for verification
+Write-Host "Binary Data: $binaryData" -ForegroundColor Yellow
 
 # Function to toggle keys (Num Lock, Caps Lock, Scroll Lock)
 function Toggle-Key {
@@ -79,6 +86,14 @@ foreach ($bit in $binaryData.ToCharArray()) {
     }
     Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
+
+# Decode the binary back to characters for printing to console
+$decodedText = [System.Text.Encoding]::UTF8.GetString(
+    [System.Convert]::FromBase64String(
+        [string]::Join("", $binaryData -split "(?<=\G.{8})")
+    )
+)
+Write-Host "Decoded Text: $decodedText" -ForegroundColor Green
 
 # Change Scroll Lock to the opposite of its original state
 Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was ON, turn it OFF
