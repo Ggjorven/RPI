@@ -1,5 +1,5 @@
 # Path to the .txt file
-$filePath = "C:\path\to\your\file.txt"
+$filePath = "test.txt"
 
 # Read the file and convert it to binary (1's and 0's)
 $fileContent = Get-Content -Raw -Path $filePath
