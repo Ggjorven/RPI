@@ -93,7 +93,6 @@ $decodedText = [System.Text.Encoding]::UTF8.GetString(
         [string]::Join("", $binaryData -split "(?<=\G.{8})")
     )
 )
-Write-Host "Decoded Text: $decodedText" -ForegroundColor Green
 
 # Change Scroll Lock to the opposite of its original state
 Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was ON, turn it OFF
