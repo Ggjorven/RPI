@@ -48,28 +48,25 @@ function Toggle-Key {
     param (
         [string]$KeyName
     )
-    # Get virtual key code for the key
-    $virtualKey = switch ($KeyName) {
-        "CapsLock" { 0x14 }
-        "NumLock" { 0x90 }
-        "ScrollLock" { 0x91 }
-        default { return }
+
+    # Define a mapping of key names to their SendKeys representation
+    $keyMapping = @{
+        "CapsLock"  = '{CAPSLOCK}'
+        "NumLock"   = '{NUMLOCK}'
+        "ScrollLock" = '{SCROLLLOCK}'
     }
 
-    # Check current state of the key
-    $keyState = [Keyboard]::GetKeyState($virtualKey)
-    $isToggled = $keyState -band 0x01
+    # Get the SendKeys representation for the given key name
+    $sendKey = $keyMapping[$KeyName]
 
-    # Toggle the key to change its state
-    [Keyboard]::keybd_event($virtualKey, 0, 0, [UIntPtr]::Zero)        # Key down
-    [Keyboard]::keybd_event($virtualKey, 0, [Keyboard]::KEYEVENTF_KEYUP, [UIntPtr]::Zero)  # Key up
-
-    # If the key was already toggled, toggle it again to reset its state
-    if ($isToggled) {
-        Start-Sleep -Milliseconds 50
-        [Keyboard]::keybd_event($virtualKey, 0, 0, [UIntPtr]::Zero)    # Key down
-        [Keyboard]::keybd_event($virtualKey, 0, [Keyboard]::KEYEVENTF_KEYUP, [UIntPtr]::Zero)  # Key up
+    if (-not $sendKey) {
+        Write-Host "Invalid key name. Please use 'CapsLock', 'NumLock', or 'ScrollLock'."
+        return
     }
+
+    # Use SendKeys to toggle the key state
+    $shell = New-Object -ComObject WScript.Shell
+    $shell.SendKeys($sendKey)
 }
 
 # Store the original states of Caps Lock, Num Lock, and Scroll Lock
