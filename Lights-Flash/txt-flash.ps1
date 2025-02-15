@@ -88,6 +88,7 @@ foreach ($bit in $binaryData.ToCharArray()) {
 
 # Change Scroll Lock to the opposite of its original state
 Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was OFF, turn it ON
+Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was ON, turn it OFF
 
 # Reset all locks to their original states only if needed
